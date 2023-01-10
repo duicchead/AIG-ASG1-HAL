@@ -42,9 +42,10 @@ class Knight_TeamA(Character):
         
         Character.process(self, time_passed)
 
-        level_up_stats = ["hp", "speed", "melee damage", "melee cooldown"]
+        level_up_stats = ["hp", "speed", "melee damage", "melee cooldown", "healing"]
         if self.can_level_up():
-            choice = randint(0, len(level_up_stats) - 1)
+            #choice = randint(0, len(level_up_stats) - 1)
+            choice = 4
             self.level_up(level_up_stats[choice])
 
    
@@ -129,6 +130,9 @@ class KnightStateAttacking_TeamA(State):
 
 
     def check_conditions(self):
+
+        if self.knight.current_hp < 150:
+            self.knight.heal()
 
         # target is gone
         if self.knight.world.get(self.knight.target.id) is None or self.knight.target.ko:
