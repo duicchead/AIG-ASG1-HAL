@@ -18,6 +18,7 @@ class Archer_TeamA(Character):
         self.position = position
         self.move_target = GameEntity(world, "archer_move_target", None)
         self.target = None
+        self.level = 0
 
         self.maxSpeed = 50
         self.min_target_distance = 100
@@ -25,10 +26,12 @@ class Archer_TeamA(Character):
         self.projectile_speed = 100
 
         seeking_state = ArcherStateSeeking_TeamA(self)
+        kiting_state = ArcherStateKiting_TeamA(self)
         attacking_state = ArcherStateAttacking_TeamA(self)
         ko_state = ArcherStateKO_TeamA(self)
 
         self.brain.add_state(seeking_state)
+        self.brain.add_state(kiting_state)
         self.brain.add_state(attacking_state)
         self.brain.add_state(ko_state)
 
@@ -45,9 +48,12 @@ class Archer_TeamA(Character):
         
         level_up_stats = ["hp", "speed", "ranged damage", "ranged cooldown", "projectile range"]
         if self.can_level_up():
+            self.level += 1
             #choice = randint(0, len(level_up_stats) - 1)
-            choice = 3
-            self.level_up(level_up_stats[choice])   
+            if self.level >= 2:
+                self.level_up(level_up_stats[3])   
+            else:
+                self.level_up(level_up_stats[3])
 
 
 class ArcherStateSeeking_TeamA(State):
@@ -67,10 +73,15 @@ class ArcherStateSeeking_TeamA(State):
             self.archer.velocity.normalize_ip();
             self.archer.velocity *= self.archer.maxSpeed
 
+        nearest_opponent = self.archer.world.get_nearest_opponent(self.archer)
+        opponent_distance = (self.archer.position - nearest_opponent.position).length()
+        if opponent_distance > 270 and self.archer.current_hp < 150:
+            self.archer.heal()
+
 
     def check_conditions(self):
-        if self.archer.current_hp < 161:
-            self.archer.heal()
+        #if self.archer.current_hp < 50:
+            #self.archer.heal()
 
         # check if opponent is in range
         nearest_opponent = self.archer.world.get_nearest_opponent(self.archer)
@@ -107,6 +118,27 @@ class ArcherStateSeeking_TeamA(State):
         else:
             self.archer.move_target.position = self.archer.path_graph.nodes[self.archer.base.target_node_index].position
 
+class ArcherStateKiting_TeamA(State):
+    def __init__(self, archer):
+
+        State.__init__(self, "kiting")
+        self.archer = archer
+
+    def do_actions(self):
+
+        self.archer.velocity = self.archer.position - self.archer.target.position
+        if self.archer.velocity.length() > 0:
+            self.archer.velocity.normalize_ip();
+            self.archer.velocity *= self.archer.maxSpeed
+
+    def check_conditions(self):
+        #larger number, longer it takes for archer to escape kiting state and go back to attacking. 1.75 just nice?
+        if self.archer.current_ranged_cooldown <= self.archer.ranged_cooldown / 1.7:
+            return "attacking"
+
+    def entry_actions(self):
+
+        return None
 
 class ArcherStateAttacking_TeamA(State):
 
@@ -138,6 +170,12 @@ class ArcherStateAttacking_TeamA(State):
         if self.archer.world.get(self.archer.target.id) is None or self.archer.target.ko:
             self.archer.target = None
             return "seeking"
+
+        # opponent within range
+        #opponent_distance = (self.archer.position - self.archer.target.position).length()
+        #if opponent_distance <= self.archer.min_target_distance:
+        if self.archer.current_ranged_cooldown == self.archer.ranged_cooldown:
+            return "kiting"
 
         return None
 

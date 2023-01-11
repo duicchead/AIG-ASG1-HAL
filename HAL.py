@@ -227,13 +227,18 @@ class World(object):
         temp = 0
         for entity in self.entities.values():
             distance = (char.position - entity.position).length()
-            if distance > 150:
+            if distance < 150:
                 if entity.team_id == 1:
                     temp += 1
 
         return temp
 
-
+    def get_all_nearby_heroes(self,char):
+        temp = 0
+        for entity in self.entities.values():
+            distance = (char.position - entity.position).length()
+            if entity.team_id == 0 and entity.max_hp >= 150 and distance < 200:
+                temp += 1
 
 
 class Obstacle(GameEntity):

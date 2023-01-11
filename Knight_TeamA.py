@@ -136,7 +136,7 @@ class KnightStateAttacking_TeamA(State):
 
     def check_conditions(self):
         num_of_nearby_opponents = self.knight.world.get_all_nearby_opponents(self.knight)
-        if self.knight.current_hp < 320 and self.knight.level >= 3 and num_of_nearby_opponents >= 2:
+        if self.knight.current_hp < 330 and self.knight.level >= 3 and num_of_nearby_opponents >= 3:
             self.knight.heal()
 
         # target is gone
