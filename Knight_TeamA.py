@@ -16,6 +16,7 @@ class Knight_TeamA(Character):
         self.position = position
         self.move_target = GameEntity(world, "knight_move_target", None)
         self.target = None
+        self.level = 0
 
         self.maxSpeed = 80
         self.min_target_distance = 100
@@ -44,6 +45,7 @@ class Knight_TeamA(Character):
 
         level_up_stats = ["hp", "speed", "melee damage", "melee cooldown", "healing"]
         if self.can_level_up():
+            self.level += 1
             #choice = randint(0, len(level_up_stats) - 1)
             choice = 4
             self.level_up(level_up_stats[choice])
@@ -70,6 +72,9 @@ class KnightStateSeeking_TeamA(State):
 
 
     def check_conditions(self):
+
+        if self.knight.current_hp < 350:
+            self.knight.heal()
 
         # check if opponent is in range
         nearest_opponent = self.knight.world.get_nearest_opponent(self.knight)
@@ -130,8 +135,8 @@ class KnightStateAttacking_TeamA(State):
 
 
     def check_conditions(self):
-
-        if self.knight.current_hp < 150:
+        num_of_nearby_opponents = self.knight.world.get_all_nearby_opponents(self.knight)
+        if self.knight.current_hp < 320 and self.knight.level >= 3 and num_of_nearby_opponents >= 2:
             self.knight.heal()
 
         # target is gone

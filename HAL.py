@@ -223,6 +223,17 @@ class World(object):
         
         return nearest_opponent
 
+    def get_all_nearby_opponents(self,char):
+        temp = 0
+        for entity in self.entities.values():
+            distance = (char.position - entity.position).length()
+            if distance > 150:
+                if entity.team_id == 1:
+                    temp += 1
+
+        return temp
+
+
 
 
 class Obstacle(GameEntity):

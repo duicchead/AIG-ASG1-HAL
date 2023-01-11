@@ -45,7 +45,8 @@ class Archer_TeamA(Character):
         
         level_up_stats = ["hp", "speed", "ranged damage", "ranged cooldown", "projectile range"]
         if self.can_level_up():
-            choice = randint(0, len(level_up_stats) - 1)
+            #choice = randint(0, len(level_up_stats) - 1)
+            choice = 3
             self.level_up(level_up_stats[choice])   
 
 
@@ -68,6 +69,8 @@ class ArcherStateSeeking_TeamA(State):
 
 
     def check_conditions(self):
+        if self.archer.current_hp < 161:
+            self.archer.heal()
 
         # check if opponent is in range
         nearest_opponent = self.archer.world.get_nearest_opponent(self.archer)
