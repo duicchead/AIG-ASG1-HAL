@@ -136,13 +136,15 @@ class WizardStateAttacking_TeamA(State):
             #nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
 
             enemy_spawn_pos = enemy_base.spawn_position
-            enemy_spawn_pos_distance = (self.wizard.position - enemy_spawn_pos).length()
+            enemy_spawn_pos_distance = (
+                self.wizard.position - enemy_spawn_pos).length()
 
             self.wizard.velocity = Vector2(0, 0)
             if self.wizard.current_ranged_cooldown <= 0:
 
                 if enemy_spawn_pos_distance <= 250:
-                    self.wizard.ranged_attack(enemy_spawn_pos, self.wizard.explosion_image)
+                    self.wizard.ranged_attack(
+                        enemy_spawn_pos, self.wizard.explosion_image)
 
                 else:
                     self.wizard.ranged_attack(
