@@ -77,7 +77,7 @@ class ArcherStateSeeking_TeamA(State):
         nearest_opponent = self.archer.world.get_nearest_opponent(self.archer)
         opponent_distance = (self.archer.position -
                              nearest_opponent.position).length()
-        if opponent_distance > 270 and self.archer.current_hp < 150:
+        if opponent_distance > 250 and self.archer.current_hp < self.archer.max_hp:
             self.archer.heal()
 
     def check_conditions(self):
@@ -171,16 +171,20 @@ class ArcherStateAttacking_TeamA(State):
 
     def check_conditions(self):
 
+        nearest_opponent = self.archer.world.get_nearest_opponent(self.archer)
+        opponent_distance = (self.archer.position -
+                             nearest_opponent.position).length()
+
         # target is gone
         if self.archer.world.get(self.archer.target.id) is None or self.archer.target.ko:
             self.archer.target = None
             return "seeking"
 
         # opponent within range
-        #opponent_distance = (self.archer.position - self.archer.target.position).length()
-        # if opponent_distance <= self.archer.min_target_distance:
-        if self.archer.current_ranged_cooldown == self.archer.ranged_cooldown:
-            return "kiting"
+        if nearest_opponent.max_hp == 400 or nearest_opponent.max_hp == 100 and opponent_distance <= self.archer.min_target_distance:
+            if self.archer.current_ranged_cooldown == self.archer.ranged_cooldown:
+                self.archer.target = nearest_opponent
+                return "kiting"
 
         return None
 

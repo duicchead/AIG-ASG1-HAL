@@ -32,7 +32,8 @@ class World(object):
         self.entities = {}
         self.entity_id = 0
         self.obstacles = []
-        self.background = pygame.image.load("assets\grass_bkgrd_1024_768.png").convert_alpha()
+        self.background = pygame.image.load(
+            "assets\grass_bkgrd_1024_768.png").convert_alpha()
 
         self.graph = Graph(self)
         self.generate_pathfinding_graphs("pathfinding_graph.txt")
@@ -40,9 +41,9 @@ class World(object):
 
         self.countdown_timer = TIME_LIMIT
         self.game_end = False
-        
 
     # --- Reads a set of pathfinding graphs from a file ---
+
     def generate_pathfinding_graphs(self, filename):
 
         f = open(filename, "r")
@@ -51,7 +52,8 @@ class World(object):
         line = f.readline()
         while line != "connections\n":
             data = line.split()
-            self.graph.nodes[int(data[0])] = Node(self.graph, int(data[0]), int(data[1]), int(data[2]))
+            self.graph.nodes[int(data[0])] = Node(
+                self.graph, int(data[0]), int(data[1]), int(data[2]))
             line = f.readline()
 
         # Create the connections
@@ -60,9 +62,12 @@ class World(object):
             data = line.split()
             node0 = int(data[0])
             node1 = int(data[1])
-            distance = (Vector2(self.graph.nodes[node0].position) - Vector2(self.graph.nodes[node1].position)).length()
-            self.graph.nodes[node0].addConnection(self.graph.nodes[node1], distance)
-            self.graph.nodes[node1].addConnection(self.graph.nodes[node0], distance)
+            distance = (Vector2(
+                self.graph.nodes[node0].position) - Vector2(self.graph.nodes[node1].position)).length()
+            self.graph.nodes[node0].addConnection(
+                self.graph.nodes[node1], distance)
+            self.graph.nodes[node1].addConnection(
+                self.graph.nodes[node0], distance)
             line = f.readline()
 
         # Create the orc paths, which are also Graphs
@@ -71,26 +76,27 @@ class World(object):
         while line != "":
             path = Graph(self)
             data = line.split()
-            
+
             # Create the nodes
             for i in range(0, len(data)):
                 node = self.graph.nodes[int(data[i])]
-                path.nodes[int(data[i])] = Node(path, int(data[i]), node.position[0], node.position[1])
+                path.nodes[int(data[i])] = Node(
+                    path, int(data[i]), node.position[0], node.position[1])
 
             # Create the connections
             for i in range(0, len(data)-1):
                 node0 = int(data[i])
                 node1 = int(data[i + 1])
-                distance = (Vector2(self.graph.nodes[node0].position) - Vector2(self.graph.nodes[node1].position)).length()
+                distance = (Vector2(
+                    self.graph.nodes[node0].position) - Vector2(self.graph.nodes[node1].position)).length()
                 path.nodes[node0].addConnection(path.nodes[node1], distance)
                 path.nodes[node1].addConnection(path.nodes[node0], distance)
-                
+
             self.paths.append(path)
 
             line = f.readline()
 
         f.close()
-
 
     def add_entity(self, entity):
 
@@ -98,17 +104,16 @@ class World(object):
         entity.id = self.entity_id
         self.entity_id += 1
 
-
     def remove_entity(self, entity):
 
         if entity.name == "base":
             self.game_end = True
             self.game_result = TEAM_NAME[1 - entity.team_id] + " wins!"
-            self.final_scores = "Time left - " + str(int(self.countdown_timer)) + " (base destroyed)"
+            self.final_scores = "Time left - " + \
+                str(int(self.countdown_timer)) + " (base destroyed)"
 
         if entity.id in self.entities.keys():
             del self.entities[entity.id]
-
 
     def get(self, entity_id):
 
@@ -117,7 +122,6 @@ class World(object):
 
         else:
             return None
-
 
     def process(self, time_passed):
 
@@ -134,14 +138,16 @@ class World(object):
 
             if self.scores[0] > self.scores[1]:
                 self.game_result = TEAM_NAME[0] + " wins!"
-                self.final_scores = str(self.scores[0]) + " - " + str(self.scores[1])
+                self.final_scores = str(
+                    self.scores[0]) + " - " + str(self.scores[1])
             elif self.scores[1] > self.scores[0]:
                 self.game_result = TEAM_NAME[1] + " wins!"
-                self.final_scores = str(self.scores[1]) + " - " + str(self.scores[0])
+                self.final_scores = str(
+                    self.scores[1]) + " - " + str(self.scores[0])
             else:
                 self.game_result = "DRAW"
-                self.final_scores = str(self.scores[0]) + " - " + str(self.scores[1])
-            
+                self.final_scores = str(
+                    self.scores[0]) + " - " + str(self.scores[1])
 
     def render(self, surface):
 
@@ -158,40 +164,45 @@ class World(object):
 
         # draw the scores
         font = pygame.font.SysFont("arial", 24, True)
-        
-        blue_score = font.render(TEAM_NAME[0] + " score = " + str(self.scores[0]), True, (0, 0, 255))
+
+        blue_score = font.render(
+            TEAM_NAME[0] + " score = " + str(self.scores[0]), True, (0, 0, 255))
         surface.blit(blue_score, (150, 10))
 
-        red_score = font.render(TEAM_NAME[1] + " score = " + str(self.scores[1]), True, (255, 0, 0))
+        red_score = font.render(
+            TEAM_NAME[1] + " score = " + str(self.scores[1]), True, (255, 0, 0))
         surface.blit(red_score, (870 - red_score.get_size()[0], 730))
 
         # draw the countdown timer
-        timer = font.render(str("Time left = " + str(int(self.countdown_timer))), True, (255, 255, 255))
+        timer = font.render(
+            str("Time left = " + str(int(self.countdown_timer))), True, (255, 255, 255))
         w, h = timer.get_size()
-        surface.blit(timer, (SCREEN_WIDTH // 2 - w//2 , SCREEN_HEIGHT // 2 - h//2))
+        surface.blit(timer, (SCREEN_WIDTH // 2 - w //
+                     2, SCREEN_HEIGHT // 2 - h//2))
 
         # game end
         if self.game_end:
             end_font = pygame.font.SysFont("arial", 60, True)
-            
+
             msg = end_font.render(self.game_result, True, (255, 255, 255))
             w, h = msg.get_size()
-            surface.blit(msg, (SCREEN_WIDTH // 2 - w//2 , SCREEN_HEIGHT // 2 - h//2 - 200))
+            surface.blit(msg, (SCREEN_WIDTH // 2 - w//2,
+                         SCREEN_HEIGHT // 2 - h//2 - 200))
 
             msg = end_font.render(self.final_scores, True, (255, 255, 255))
             w, h = msg.get_size()
-            surface.blit(msg, (SCREEN_WIDTH // 2 - w//2 , SCREEN_HEIGHT // 2 - h//2 - 100))
-
+            surface.blit(msg, (SCREEN_WIDTH // 2 - w//2,
+                         SCREEN_HEIGHT // 2 - h//2 - 100))
 
     def get_entity(self, name):
 
         for entity in self.entities.values():
             if entity.name == name:
                 return entity
-        
+
         return None
 
-    # --- returns the nearest opponent, which is a non-projectile, character from the opposing team that is not ko'd ---    
+    # --- returns the nearest opponent, which is a non-projectile, character from the opposing team that is not ko'd ---
     def get_nearest_opponent(self, char):
 
         nearest_opponent = None
@@ -220,10 +231,10 @@ class World(object):
                 if distance > (char.position - entity.position).length():
                     distance = (char.position - entity.position).length()
                     nearest_opponent = entity
-        
+
         return nearest_opponent
 
-    def get_all_nearby_opponents(self,char):
+    def get_all_nearby_opponents(self, char):
         temp = 0
         for entity in self.entities.values():
             distance = (char.position - entity.position).length()
@@ -233,22 +244,22 @@ class World(object):
 
         return temp
 
-    def get_all_nearby_heroes(self,char):
+    def get_all_nearby_heroes(self, char):
         temp = 0
         for entity in self.entities.values():
             distance = (char.position - entity.position).length()
             if entity.team_id == 0 and entity.max_hp >= 150 and distance < 200:
                 temp += 1
 
-    def is_enemybase_inrange(self,char):
+    def is_enemybase_inrange(self, char):
         for entity in self.entities.values():
             if entity.team_id == 1 and entity.spawn_node_index == 4:
                 position = Vector2(entity.spawn_position)
                 return position
 
-    def enemy_base(self,char):
+    def enemy_base(self, char):
         for entity in self.entities.values():
-            if entity.team_id == 1 and entity.max_hp == 1000:
+            if entity.team_id == 1 and entity.max_hp >= 1000:
                 return entity
 
 
@@ -265,7 +276,6 @@ class Obstacle(GameEntity):
     def process(self, time_passed):
 
         GameEntity.process(self, time_passed)
-        
 
 
 def run():
@@ -279,34 +289,50 @@ def run():
 
     # --- Load images ---
     blue_base_image = pygame.image.load("assets/blue_base.png").convert_alpha()
-    blue_orc_image = pygame.image.load("assets/blue_orc_32_32.png").convert_alpha()
-    blue_tower_image = pygame.image.load("assets/blue_tower.png").convert_alpha()
+    blue_orc_image = pygame.image.load(
+        "assets/blue_orc_32_32.png").convert_alpha()
+    blue_tower_image = pygame.image.load(
+        "assets/blue_tower.png").convert_alpha()
     blue_rock_image = pygame.image.load("assets/blue_rock.png").convert_alpha()
-    blue_knight_image = pygame.image.load("assets/blue_knight_32_32.png").convert_alpha()
-    blue_archer_image = pygame.image.load("assets/blue_archer_32_32.png").convert_alpha()
-    blue_arrow_image = pygame.image.load("assets/blue_arrow.png").convert_alpha()
-    blue_wizard_image = pygame.image.load("assets/blue_wizard_32_32.png").convert_alpha()
-    blue_explosion_image = pygame.image.load("assets/blue_explosion.png").convert_alpha()
+    blue_knight_image = pygame.image.load(
+        "assets/blue_knight_32_32.png").convert_alpha()
+    blue_archer_image = pygame.image.load(
+        "assets/blue_archer_32_32.png").convert_alpha()
+    blue_arrow_image = pygame.image.load(
+        "assets/blue_arrow.png").convert_alpha()
+    blue_wizard_image = pygame.image.load(
+        "assets/blue_wizard_32_32.png").convert_alpha()
+    blue_explosion_image = pygame.image.load(
+        "assets/blue_explosion.png").convert_alpha()
 
     red_base_image = pygame.image.load("assets/red_base.png").convert_alpha()
-    red_orc_image = pygame.image.load("assets/red_orc_32_32.png").convert_alpha()
+    red_orc_image = pygame.image.load(
+        "assets/red_orc_32_32.png").convert_alpha()
     red_tower_image = pygame.image.load("assets/red_tower.png").convert_alpha()
     red_rock_image = pygame.image.load("assets/red_rock.png").convert_alpha()
-    red_knight_image = pygame.image.load("assets/red_knight_32_32.png").convert_alpha()
-    red_archer_image = pygame.image.load("assets/red_archer_32_32.png").convert_alpha()
+    red_knight_image = pygame.image.load(
+        "assets/red_knight_32_32.png").convert_alpha()
+    red_archer_image = pygame.image.load(
+        "assets/red_archer_32_32.png").convert_alpha()
     red_arrow_image = pygame.image.load("assets/red_arrow.png").convert_alpha()
-    red_wizard_image = pygame.image.load("assets/red_wizard_32_32.png").convert_alpha()
-    red_explosion_image = pygame.image.load("assets/red_explosion.png").convert_alpha()
+    red_wizard_image = pygame.image.load(
+        "assets/red_wizard_32_32.png").convert_alpha()
+    red_explosion_image = pygame.image.load(
+        "assets/red_explosion.png").convert_alpha()
 
-    grey_tower_image = pygame.image.load("assets/grey_tower.png").convert_alpha()
-    grey_projectile_image = pygame.image.load("assets/grey_rock.png").convert_alpha()
-    mountain_image_1 = pygame.image.load("assets/mountain_1.png").convert_alpha()
-    mountain_image_2 = pygame.image.load("assets/mountain_2.png").convert_alpha()
+    grey_tower_image = pygame.image.load(
+        "assets/grey_tower.png").convert_alpha()
+    grey_projectile_image = pygame.image.load(
+        "assets/grey_rock.png").convert_alpha()
+    mountain_image_1 = pygame.image.load(
+        "assets/mountain_1.png").convert_alpha()
+    mountain_image_2 = pygame.image.load(
+        "assets/mountain_2.png").convert_alpha()
     plateau_image = pygame.image.load("assets/plateau.png").convert_alpha()
 
-
     # --- Initialize Blue buildings and units ---
-    blue_base = Base(world, blue_base_image, blue_orc_image, blue_rock_image, 0, 4)
+    blue_base = Base(world, blue_base_image,
+                     blue_orc_image, blue_rock_image, 0, 4)
     blue_base.position = Vector2(68, 68)
     blue_base.team_id = 0
     blue_base.max_hp = BASE_MAX_HP
@@ -345,7 +371,8 @@ def run():
     blue_tower_2.brain.set_state("tower_state")
     world.add_entity(blue_tower_2)
 
-    blue_knight = Knight_TeamA(world, blue_knight_image, blue_base, Vector2(blue_base.spawn_position))
+    blue_knight = Knight_TeamA(
+        world, blue_knight_image, blue_base, Vector2(blue_base.spawn_position))
     blue_knight.team_id = 0
     blue_knight.max_hp = KNIGHT_MAX_HP
     blue_knight.maxSpeed = KNIGHT_MAX_SPEED
@@ -355,7 +382,8 @@ def run():
     blue_knight.current_hp = blue_knight.max_hp
     world.add_entity(blue_knight)
 
-    blue_archer = Archer_TeamA(world, blue_archer_image, blue_arrow_image, blue_base, Vector2(blue_base.spawn_position))
+    blue_archer = Archer_TeamA(
+        world, blue_archer_image, blue_arrow_image, blue_base, Vector2(blue_base.spawn_position))
     blue_archer.team_id = 0
     blue_archer.max_hp = ARCHER_MAX_HP
     blue_archer.maxSpeed = ARCHER_MAX_SPEED
@@ -367,7 +395,8 @@ def run():
     blue_archer.current_hp = blue_archer.max_hp
     world.add_entity(blue_archer)
 
-    blue_wizard = Wizard_TeamA(world, blue_wizard_image, blue_rock_image, blue_base, Vector2(blue_base.spawn_position), blue_explosion_image)
+    blue_wizard = Wizard_TeamA(world, blue_wizard_image, blue_rock_image, blue_base, Vector2(
+        blue_base.spawn_position), blue_explosion_image)
     blue_wizard.team_id = 0
     blue_wizard.max_hp = WIZARD_MAX_HP
     blue_wizard.maxSpeed = WIZARD_MAX_SPEED
@@ -378,7 +407,6 @@ def run():
     blue_wizard.ranged_cooldown = WIZARD_RANGED_COOLDOWN
     blue_wizard.current_hp = blue_wizard.max_hp
     world.add_entity(blue_wizard)
-
 
     # --- Initialize Red buildings and units ---
     red_base = Base(world, red_base_image, red_orc_image, red_rock_image, 4, 0)
@@ -420,7 +448,8 @@ def run():
     red_tower_2.brain.set_state("tower_state")
     world.add_entity(red_tower_2)
 
-    red_knight = Knight_TeamB(world, red_knight_image, red_base, Vector2(red_base.spawn_position))
+    red_knight = Knight_TeamB(world, red_knight_image,
+                              red_base, Vector2(red_base.spawn_position))
     red_knight.team_id = 1
     red_knight.max_hp = KNIGHT_MAX_HP * RED_MULTIPLIER
     red_knight.maxSpeed = KNIGHT_MAX_SPEED
@@ -430,7 +459,8 @@ def run():
     red_knight.current_hp = red_knight.max_hp
     world.add_entity(red_knight)
 
-    red_archer = Archer_TeamB(world, red_archer_image, red_arrow_image, red_base, Vector2(red_base.spawn_position))
+    red_archer = Archer_TeamB(
+        world, red_archer_image, red_arrow_image, red_base, Vector2(red_base.spawn_position))
     red_archer.team_id = 1
     red_archer.max_hp = ARCHER_MAX_HP * RED_MULTIPLIER
     red_archer.maxSpeed = ARCHER_MAX_SPEED
@@ -442,7 +472,8 @@ def run():
     red_archer.current_hp = red_archer.max_hp
     world.add_entity(red_archer)
 
-    red_wizard = Wizard_TeamB(world, red_wizard_image, red_rock_image, red_base, Vector2(red_base.spawn_position), red_explosion_image)
+    red_wizard = Wizard_TeamB(world, red_wizard_image, red_rock_image, red_base, Vector2(
+        red_base.spawn_position), red_explosion_image)
     red_wizard.team_id = 1
     red_wizard.max_hp = WIZARD_MAX_HP * RED_MULTIPLIER
     red_wizard.maxSpeed = WIZARD_MAX_SPEED
@@ -453,7 +484,6 @@ def run():
     red_wizard.ranged_cooldown = WIZARD_RANGED_COOLDOWN
     red_wizard.current_hp = red_wizard.max_hp
     world.add_entity(red_wizard)
-    
 
     # --- Initialize other entities in the world ---
     mountain_1 = Obstacle(world, mountain_image_1)
@@ -503,7 +533,8 @@ def run():
             screen.blit(world.background, (0, 0))
             font = pygame.font.SysFont("arial", 60, True)
 
-            title = font.render("Heroes of Ancient Legends", True, (0, 255, 255))
+            title = font.render("Heroes of Ancient Legends",
+                                True, (0, 255, 255))
             screen.blit(title, (w//2 - title.get_width()//2, 100))
             team1 = font.render(TEAM_NAME[0] + " (blue)", True, (0, 0, 255))
             screen.blit(team1, (w//2 - team1.get_width()//2, 200))
@@ -531,20 +562,9 @@ def run():
             world.process(time_passed)
 
         world.render(screen)
-        
+
         pygame.display.update()
-        
+
 
 if __name__ == "__main__":
     run()
-
-
-
-
-        
-        
-
-
-
-
-        
