@@ -240,6 +240,17 @@ class World(object):
             if entity.team_id == 0 and entity.max_hp >= 150 and distance < 200:
                 temp += 1
 
+    def is_enemybase_inrange(self,char):
+        for entity in self.entities.values():
+            if entity.team_id == 1 and entity.spawn_node_index == 4:
+                position = Vector2(entity.spawn_position)
+                return position
+
+    def enemy_base(self,char):
+        for entity in self.entities.values():
+            if entity.team_id == 1 and entity.max_hp == 1000:
+                return entity
+
 
 class Obstacle(GameEntity):
 
