@@ -181,7 +181,7 @@ class ArcherStateAttacking_TeamA(State):
             return "seeking"
 
         # opponent within range
-        if nearest_opponent.max_hp >= 400 or nearest_opponent.max_hp == 100 and opponent_distance <= self.archer.min_target_distance:
+        if nearest_opponent.max_hp == 400 or nearest_opponent.max_hp == 100 and opponent_distance <= self.archer.min_target_distance:
             if self.archer.current_ranged_cooldown == self.archer.ranged_cooldown:
                 self.archer.target = nearest_opponent
                 return "kiting"
