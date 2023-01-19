@@ -77,7 +77,7 @@ class ArcherStateSeeking_TeamA(State):
         nearest_opponent = self.archer.world.get_nearest_opponent(self.archer)
         opponent_distance = (self.archer.position -
                              nearest_opponent.position).length()
-        if opponent_distance > 270 and self.archer.current_hp < 150:
+        if opponent_distance > 250 and self.archer.current_hp < self.archer.max_hp:
             self.archer.heal()
 
     def check_conditions(self):

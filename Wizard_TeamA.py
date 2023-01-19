@@ -75,6 +75,13 @@ class WizardStateSeeking_TeamA(State):
             self.wizard.velocity.normalize_ip()
             self.wizard.velocity *= self.wizard.maxSpeed
 
+        nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
+        opponent_distance = (self.wizard.position -
+                             nearest_opponent.position).length()
+
+        if opponent_distance > 200 and self.wizard.current_hp < self.wizard.max_hp:
+            self.wizard.heal()
+
     def check_conditions(self):
 
         # check if opponent is in range
