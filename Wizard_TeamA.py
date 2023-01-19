@@ -174,7 +174,7 @@ class WizardStateAttacking_TeamA(State):
         opponent_distance = (self.wizard.position -
                              nearest_opponent.position).length()
 
-        if nearest_opponent.max_hp == 400 or nearest_opponent.max_hp == 100 and opponent_distance <= self.wizard.min_target_distance:
+        if nearest_opponent.melee_damage > 0 and opponent_distance <= self.wizard.min_target_distance:
             if self.wizard.current_ranged_cooldown == self.wizard.ranged_cooldown:
                 self.wizard.target = nearest_opponent
                 return "kiting"
