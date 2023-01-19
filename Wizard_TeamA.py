@@ -55,7 +55,7 @@ class Wizard_TeamA(Character):
             if self.level >= 2:
                 self.level_up(level_up_stats[3])
             else:
-                self.level_up(level_up_stats[1])
+                self.level_up(level_up_stats[3])
 
 
 class WizardStateSeeking_TeamA(State):
@@ -129,10 +129,24 @@ class WizardStateAttacking_TeamA(State):
 
         # opponent within range
         if opponent_distance <= self.wizard.min_target_distance:
+            #enemy_base = self.wizard.world.is_enemybase_inrange(self.wizard)
+
+            enemy_base = self.wizard.world.enemy_base(self.wizard)
+
+            #nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
+
+            enemy_spawn_pos = enemy_base.spawn_position
+            enemy_spawn_pos_distance = (self.wizard.position - enemy_spawn_pos).length()
+
             self.wizard.velocity = Vector2(0, 0)
             if self.wizard.current_ranged_cooldown <= 0:
-                self.wizard.ranged_attack(
-                    self.wizard.target.position, self.wizard.explosion_image)
+
+                if enemy_spawn_pos_distance <= 250:
+                    self.wizard.ranged_attack(enemy_spawn_pos, self.wizard.explosion_image)
+
+                else:
+                    self.wizard.ranged_attack(
+                        self.wizard.target.position, self.wizard.explosion_image)
 
         else:
             self.wizard.velocity = self.wizard.target.position - self.wizard.position
@@ -151,7 +165,7 @@ class WizardStateAttacking_TeamA(State):
         opponent_distance = (self.wizard.position -
                              nearest_opponent.position).length()
 
-        if nearest_opponent.max_hp == 400 and opponent_distance <= self.wizard.min_target_distance:
+        if nearest_opponent.max_hp >= 400 or nearest_opponent.max_hp == 100 and opponent_distance <= self.wizard.min_target_distance:
             if self.wizard.current_ranged_cooldown == self.wizard.ranged_cooldown:
                 self.wizard.target = nearest_opponent
                 return "kiting"
