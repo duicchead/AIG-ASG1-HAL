@@ -75,12 +75,19 @@ class WizardStateSeeking_TeamA(State):
             self.wizard.velocity.normalize_ip()
             self.wizard.velocity *= self.wizard.maxSpeed
 
+        nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
+        opponent_distance = (self.wizard.position -
+                             nearest_opponent.position).length()
+
+        if opponent_distance > 200 and self.wizard.current_hp < self.wizard.max_hp:
+            self.wizard.heal()
+
     def check_conditions(self):
         nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
         opponent_distance = (self.wizard.position -
                              nearest_opponent.position).length()
-        if opponent_distance > 300 and self.wizard.current_hp < 100:
-            self.wizard.heal()
+        #if opponent_distance > 300 and self.wizard.current_hp < 100:
+            #self.wizard.heal()
 
         # check if opponent is in range
         nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
@@ -176,7 +183,8 @@ class WizardStateAttacking_TeamA(State):
         opponent_distance = (self.wizard.position -
                              nearest_opponent.position).length()
 
-        if nearest_opponent.max_hp >= 400 or nearest_opponent.max_hp == 100 and opponent_distance <= self.wizard.min_target_distance:
+        #if nearest_opponent.max_hp == 400 or nearest_opponent.max_hp == 100 and opponent_distance <= self.wizard.min_target_distance:
+        if nearest_opponent.melee_damage > 0 and opponent_distance <= self.wizard.min_target_distance:
             if self.wizard.current_ranged_cooldown == self.wizard.ranged_cooldown:
                 self.wizard.target = nearest_opponent
                 #return "kiting"
