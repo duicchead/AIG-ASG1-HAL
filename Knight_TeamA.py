@@ -73,16 +73,17 @@ class KnightStateSeeking_TeamA(State):
 
     def check_conditions(self):
 
-        if self.knight.current_hp < 350:
-            self.knight.heal()
-
         # check if opponent is in range
         nearest_opponent = self.knight.world.get_nearest_opponent(self.knight)
         if nearest_opponent is not None:
             opponent_distance = (self.knight.position - nearest_opponent.position).length()
+
+            if self.knight.current_hp < 350 and opponent_distance >= 150:
+                self.knight.heal()
+
             if opponent_distance <= self.knight.min_target_distance:
-                    self.knight.target = nearest_opponent
-                    return "attacking"
+                self.knight.target = nearest_opponent
+                return "attacking"
         
         if (self.knight.position - self.knight.move_target.position).length() < 8:
 
@@ -121,22 +122,41 @@ class KnightStateAttacking_TeamA(State):
         self.knight = knight
 
     def do_actions(self):
+        num_of_nearby_heroes = self.knight.world.get_all_nearby_heroes(self.knight)
+        is_wizard_near = self.knight.world.is_my_wizard_nearby(self.knight)
+        enemy_base = self.knight.world.enemy_base(self.knight)
+        enemy_spawn_pos = enemy_base.spawn_position
+        enemy_spawn_pos_distance = (self.knight.position - enemy_spawn_pos).length()
 
-        # colliding with target
-        if pygame.sprite.collide_rect(self.knight, self.knight.target):
-            self.knight.velocity = Vector2(0, 0)
-            self.knight.melee_attack(self.knight.target)
 
-        else:
-            self.knight.velocity = self.knight.target.position - self.knight.position
+        if enemy_spawn_pos_distance <= 250 and self.knight.level >= 3 and is_wizard_near >= 1: #if near base, move towards the enemy spawn point, once enemy spawn point is in range, fire at it
+            self.knight.velocity = enemy_spawn_pos - self.knight.position
             if self.knight.velocity.length() > 0:
-                self.knight.velocity.normalize_ip();
+                self.knight.velocity.normalize_ip()
                 self.knight.velocity *= self.knight.maxSpeed
+        
+        else:
+
+            # colliding with target
+            if pygame.sprite.collide_rect(self.knight, self.knight.target):
+                self.knight.velocity = Vector2(0, 0)
+                self.knight.melee_attack(self.knight.target)
+
+            else:
+                self.knight.velocity = self.knight.target.position - self.knight.position
+                if self.knight.velocity.length() > 0:
+                    self.knight.velocity.normalize_ip();
+                    self.knight.velocity *= self.knight.maxSpeed
 
 
     def check_conditions(self):
         num_of_nearby_opponents = self.knight.world.get_all_nearby_opponents(self.knight)
-        if self.knight.current_hp < 330 and self.knight.level >= 3 and num_of_nearby_opponents >= 3:
+        num_of_nearby_heroes = self.knight.world.get_all_nearby_heroes(self.knight)
+        
+        if self.knight.current_hp < 270 and self.knight.level >= 3 and num_of_nearby_heroes >= 1:
+            self.knight.heal()
+
+        if self.knight.current_hp < 350 and num_of_nearby_opponents == 0: #if no enemies nearby, jus heal
             self.knight.heal()
 
         # target is gone

@@ -76,6 +76,11 @@ class WizardStateSeeking_TeamA(State):
             self.wizard.velocity *= self.wizard.maxSpeed
 
     def check_conditions(self):
+        nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
+        opponent_distance = (self.wizard.position -
+                             nearest_opponent.position).length()
+        if opponent_distance > 300 and self.wizard.current_hp < 100:
+            self.wizard.heal()
 
         # check if opponent is in range
         nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
@@ -128,8 +133,8 @@ class WizardStateAttacking_TeamA(State):
                              self.wizard.target.position).length()
 
         # opponent within range
+        is_knight_nearby = self.wizard.world.get_all_nearby_opponents(self.wizard)
         if opponent_distance <= self.wizard.min_target_distance:
-            #enemy_base = self.wizard.world.is_enemybase_inrange(self.wizard)
 
             enemy_base = self.wizard.world.enemy_base(self.wizard)
 
@@ -141,8 +146,14 @@ class WizardStateAttacking_TeamA(State):
             self.wizard.velocity = Vector2(0, 0)
             if self.wizard.current_ranged_cooldown <= 0:
 
-                if enemy_spawn_pos_distance <= 250:
-                    self.wizard.ranged_attack(enemy_spawn_pos, self.wizard.explosion_image)
+                if enemy_spawn_pos_distance <= 250 and is_knight_nearby == 1: #if near base, move towards the enemy spawn point, once enemy spawn point is in range, fire at it
+                    self.wizard.velocity = enemy_spawn_pos - self.wizard.position
+                    if self.wizard.velocity.length() > 0:
+                        self.wizard.velocity.normalize_ip()
+                        self.wizard.velocity *= self.wizard.maxSpeed
+
+                if enemy_spawn_pos_distance <= self.wizard.min_target_distance:  
+                        self.wizard.ranged_attack(enemy_spawn_pos, self.wizard.explosion_image)
 
                 else:
                     self.wizard.ranged_attack(
@@ -168,7 +179,7 @@ class WizardStateAttacking_TeamA(State):
         if nearest_opponent.max_hp >= 400 or nearest_opponent.max_hp == 100 and opponent_distance <= self.wizard.min_target_distance:
             if self.wizard.current_ranged_cooldown == self.wizard.ranged_cooldown:
                 self.wizard.target = nearest_opponent
-                return "kiting"
+                #return "kiting"
 
         return None
 

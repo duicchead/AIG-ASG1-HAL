@@ -68,6 +68,7 @@ class ArcherStateSeeking_TeamA(State):
             0, len(self.archer.world.paths)-1)]
 
     def do_actions(self):
+        
 
         self.archer.velocity = self.archer.move_target.position - self.archer.position
         if self.archer.velocity.length() > 0:
@@ -84,14 +85,31 @@ class ArcherStateSeeking_TeamA(State):
         # if self.archer.current_hp < 50:
         # self.archer.heal()
 
-        # check if opponent is in range
-        nearest_opponent = self.archer.world.get_nearest_opponent(self.archer)
-        if nearest_opponent is not None:
-            opponent_distance = (self.archer.position -
-                                 nearest_opponent.position).length()
-            if opponent_distance <= self.archer.min_target_distance:
-                self.archer.target = nearest_opponent
+        #if near enemy base and knight is there to tank, target tower/base only
+        is_knight_nearby = self.archer.world.get_all_nearby_opponents(self.archer)
+        enemy_base = self.archer.world.enemy_base(self.archer)
+        enemy_tower = self.archer.world.nearest_enemy_tower(self.archer)
+        enemy_spawn_pos = enemy_base.spawn_position
+        enemy_spawn_pos_distance = (self.archer.position - enemy_spawn_pos).length()
+
+        if enemy_spawn_pos_distance <= 250 and is_knight_nearby == 1:
+            if enemy_tower is not None:
+                self.archer.target = enemy_tower
                 return "attacking"
+            else:
+                self.archer.target = enemy_base
+                return "attacking"
+
+
+        # check if opponent is in range
+        else:
+            nearest_opponent = self.archer.world.get_nearest_opponent(self.archer)
+            if nearest_opponent is not None:
+                opponent_distance = (self.archer.position -
+                                    nearest_opponent.position).length()
+                if opponent_distance <= self.archer.min_target_distance:
+                    self.archer.target = nearest_opponent
+                    return "attacking"
 
         if (self.archer.position - self.archer.move_target.position).length() < 8:
 
@@ -153,6 +171,8 @@ class ArcherStateAttacking_TeamA(State):
         self.archer = archer
 
     def do_actions(self):
+        
+
 
         opponent_distance = (self.archer.position -
                              self.archer.target.position).length()

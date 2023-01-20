@@ -237,8 +237,28 @@ class World(object):
         temp = 0
         for entity in self.entities.values():
             distance = (char.position - entity.position).length()
-            if entity.team_id == 0 and entity.max_hp >= 150 and distance < 200:
+            if entity.team_id == 0 and 150 >= entity.max_hp <= 399 and distance < 150: #if there is teammate archer or wizard nearby
                 temp += 1
+
+        return temp
+
+    def is_my_wizard_nearby(self,char):
+        temp = 0
+        for entity in self.entities.values():
+            distance = (char.position - entity.position).length()
+            if entity.team_id == 0 and 150 >= entity.max_hp <= 199 and distance < 200: #if there is teammate or wizard nearby
+                temp += 1
+
+        return temp
+
+    def is_my_knight_nearby(self,char):
+        temp = 0
+        for entity in self.entities.values():
+            distance = (char.position - entity.position).length()
+            if entity.team_id == 0 and 400 >= entity.max_hp <= 499 and distance < 200: #if there is teammate or wizard nearby
+                temp += 1
+
+        return temp
 
     def is_enemybase_inrange(self,char):
         for entity in self.entities.values():
@@ -250,6 +270,42 @@ class World(object):
         for entity in self.entities.values():
             if entity.team_id == 1 and entity.max_hp == 1000:
                 return entity
+
+    def enemy_tower(self,char):
+        for entity in self.entities.values():
+            if entity.team_id == 1 and entity.max_hp == 500:
+                return entity
+
+    def nearest_enemy_tower(self,char):
+        nearest_tower = None
+        distance = 0.
+
+        for entity in self.entities.values():
+
+            # neutral entity
+            if entity.team_id == 2:
+                continue
+
+            # same team
+            if entity.team_id == char.team_id:
+                continue
+
+            if entity.name == "projectile" or entity.name == "explosion":
+                continue
+
+            if entity.ko:
+                continue
+
+            if nearest_tower is None and entity.max_hp == 500:
+                nearest_tower = entity
+                distance = (char.position - entity.position).length()
+                
+            if nearest_tower is not None and entity.max_hp == 500:
+                if distance > (char.position - entity.position).length():
+                    distance = (char.position - entity.position).length()
+                    nearest_tower = entity
+        
+        return nearest_tower
 
 
 class Obstacle(GameEntity):
