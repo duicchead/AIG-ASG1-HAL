@@ -190,6 +190,7 @@ class World(object):
                 return entity
         
         return None
+        
 
     # --- returns the nearest opponent, which is a non-projectile, character from the opposing team that is not ko'd ---    
     def get_nearest_opponent(self, char):
